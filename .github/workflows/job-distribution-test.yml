@@ -1,99 +1,99 @@
 name: Job Distribution Test
 
 on:
-workflow_dispatch:
+  workflow_dispatch:
     inputs:
-    total_jobs:
+      total_jobs:
         description: 'Total jobs'
         type: number
         default: 20
-    total_runners:
+      total_runners:
         description: 'Total runners'
         type: number
         default: 3
 
 jobs:
-calculate_distribution:
+  calculate_distribution:
     runs-on: ubuntu-latest
     outputs:
-    group1_range: ${{ steps.calc.outputs.group1_range }}
-    group2_range: ${{ steps.calc.outputs.group2_range }}
-    group3_range: ${{ steps.calc.outputs.group3_range }}
+      group1_range: ${{ steps.calc.outputs.group1_range }}
+      group2_range: ${{ steps.calc.outputs.group2_range }}
+      group3_range: ${{ steps.calc.outputs.group3_range }}
     steps:
-    - name: Calculate Job Distribution
+      - name: Calculate Job Distribution
         id: calc
         run: |
-        n=${{ github.event.inputs.total_jobs }}
-        k=${{ github.event.inputs.total_runners }}
+          n=${{ github.event.inputs.total_jobs }}
+          k=${{ github.event.inputs.total_runners }}
 
-        jobs_per_runner=$((n / k))
-        remainder=$((n % k))
+          jobs_per_runner=$((n / k))
+          remainder=$((n % k))
 
-        # Group 1
-        start1=1
-        end1=$((jobs_per_runner + remainder))
-        echo "group1_range=$start1-$end1" >> $GITHUB_OUTPUT
+          # Group 1
+          start1=1
+          end1=$((jobs_per_runner + remainder))
+          echo "group1_range=$start1-$end1" >> $GITHUB_OUTPUT
 
-        # Group 2
-        start2=$((end1 + 1))
-        end2=$((start2 + jobs_per_runner - 1))
-        echo "group2_range=$start2-$end2" >> $GITHUB_OUTPUT
+          # Group 2
+          start2=$((end1 + 1))
+          end2=$((start2 + jobs_per_runner - 1))
+          echo "group2_range=$start2-$end2" >> $GITHUB_OUTPUT
 
-        # Group 3
-        start3=$((end2 + 1))
-        end3=$n
-        echo "group3_range=$start3-$end3" >> $GITHUB_OUTPUT
+          # Group 3
+          start3=$((end2 + 1))
+          end3=$n
+          echo "group3_range=$start3-$end3" >> $GITHUB_OUTPUT
 
-        echo "Distribution:"
-        echo "Group 1: $start1-$end1"
-        echo "Group 2: $start2-$end2"
-        echo "Group 3: $start3-$end3"
+          echo "Distribution:"
+          echo "Group 1: $start1-$end1"
+          echo "Group 2: $start2-$end2"
+          echo "Group 3: $start3-$end3"
 
-# 각 그룹별 실행 (GitHub-hosted runners 사용)
-group1_execution:
+  # 각 그룹별 실행 (GitHub-hosted runners 사용)
+  group1_execution:
     needs: calculate_distribution
     runs-on: ubuntu-latest
     steps:
-    - name: Execute Group 1 Jobs
+      - name: Execute Group 1 Jobs
         run: |
-        range="${{ needs.calculate_distribution.outputs.group1_range }}"
-        start=$(echo $range | cut -d'-' -f1)
-        end=$(echo $range | cut -d'-' -f2)
+          range="${{ needs.calculate_distribution.outputs.group1_range }}"
+          start=$(echo $range | cut -d'-' -f1)
+          end=$(echo $range | cut -d'-' -f2)
 
-        echo "🚀 Group 1 executing jobs $start to $end"
-        for i in $(seq $start $end); do
-            echo "  ✅ Job $i completed"
-            sleep 0.5
-        done
+          echo "🚀 Group 1 executing jobs $start to $end"
+          for i in $(seq $start $end); do
+              echo "  ✅ Job $i completed"
+              sleep 0.5
+          done
 
-group2_execution:
+  group2_execution:
     needs: calculate_distribution
     runs-on: ubuntu-latest
     steps:
-    - name: Execute Group 2 Jobs
+      - name: Execute Group 2 Jobs
         run: |
-        range="${{ needs.calculate_distribution.outputs.group2_range }}"
-        start=$(echo $range | cut -d'-' -f1)
-        end=$(echo $range | cut -d'-' -f2)
+          range="${{ needs.calculate_distribution.outputs.group2_range }}"
+          start=$(echo $range | cut -d'-' -f1)
+          end=$(echo $range | cut -d'-' -f2)
 
-        echo "🚀 Group 2 executing jobs $start to $end"
-        for i in $(seq $start $end); do
-            echo "  ✅ Job $i completed"
-            sleep 0.5
-        done
+          echo "🚀 Group 2 executing jobs $start to $end"
+          for i in $(seq $start $end); do
+              echo "  ✅ Job $i completed"
+              sleep 0.5
+          done
 
-group3_execution:
+  group3_execution:
     needs: calculate_distribution
     runs-on: ubuntu-latest
     steps:
-    - name: Execute Group 3 Jobs
+      - name: Execute Group 3 Jobs
         run: |
-        range="${{ needs.calculate_distribution.outputs.group3_range }}"
-        start=$(echo $range | cut -d'-' -f1)
-        end=$(echo $range | cut -d'-' -f2)
+          range="${{ needs.calculate_distribution.outputs.group3_range }}"
+          start=$(echo $range | cut -d'-' -f1)
+          end=$(echo $range | cut -d'-' -f2)
 
-        echo "🚀 Group 3 executing jobs $start to $end"
-        for i in $(seq $start $end); do
-            echo "  ✅ Job $i completed"
-            sleep 0.5
-        done
+          echo "🚀 Group 3 executing jobs $start to $end"
+          for i in $(seq $start $end); do
+              echo "  ✅ Job $i completed"
+              sleep 0.5
+          done
