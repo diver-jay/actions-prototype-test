@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print message
-        run: echo "Message: ${{ github.event.inputs.test_message }}"
+        run: 'echo "Message: ${{ github.event.inputs.test_message }}"'
 
       - name: Test basic functionality
         run: |
