@@ -1,0 +1,23 @@
+name: Simple Test
+
+  on:
+    workflow_dispatch:
+      inputs:
+        test_message:
+          description: 'Test message'
+          required: true
+          default: 'Hello World'
+
+  jobs:
+    simple_job:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Print message
+          run: echo "Message: ${{ github.event.inputs.test_message }}"
+
+        - name: Test basic functionality
+          run: |
+            echo "Repository: ${{ github.repository }}"
+            echo "Actor: ${{ github.actor }}"
+            echo "Run ID: ${{ github.run_id }}"
+
