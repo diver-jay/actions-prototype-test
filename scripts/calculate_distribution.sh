@@ -18,17 +18,23 @@ remainder=$((n % k))
 # Group 1 (gets the remainder jobs)
 start1=1
 end1=$((jobs_per_runner + remainder))
-echo "group1_range=$start1-$end1" >> $GITHUB_OUTPUT
 
 # Group 2
 start2=$((end1 + 1))
 end2=$((start2 + jobs_per_runner - 1))
-echo "group2_range=$start2-$end2" >> $GITHUB_OUTPUT
 
 # Group 3
 start3=$((end2 + 1))
 end3=$n
-echo "group3_range=$start3-$end3" >> $GITHUB_OUTPUT
+
+# Create JSON array for matrix strategy
+groups_json="["
+groups_json+="{\"name\":\"Group 1\",\"range\":\"$start1-$end1\"},"
+groups_json+="{\"name\":\"Group 2\",\"range\":\"$start2-$end2\"},"
+groups_json+="{\"name\":\"Group 3\",\"range\":\"$start3-$end3\"}"
+groups_json+="]"
+
+echo "groups_matrix=$groups_json" >> $GITHUB_OUTPUT
 
 # Display distribution
 echo "Distribution:"

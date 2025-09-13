@@ -16,9 +16,7 @@ jobs:
   calculate_distribution:
     runs-on: ubuntu-latest
     outputs:
-      group1_range: ${{ steps.calc.outputs.group1_range }}
-      group2_range: ${{ steps.calc.outputs.group2_range }}
-      group3_range: ${{ steps.calc.outputs.group3_range }}
+      groups_matrix: ${{ steps.calc.outputs.groups_matrix }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,39 +27,18 @@ jobs:
           chmod +x scripts/calculate_distribution.sh
           ./scripts/calculate_distribution.sh ${{ github.event.inputs.total_jobs }} ${{ github.event.inputs.total_runners }}
 
-  # 각 그룹별 실행 (GitHub-hosted runners 사용)
-  group1_execution:
+  # 동적 Matrix를 사용한 그룹별 실행
+  group_execution:
     needs: calculate_distribution
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        group: ${{ fromJson(needs.calculate_distribution.outputs.groups_matrix) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Execute Group 1 Jobs
+      - name: Execute Jobs for ${{ matrix.group.name }}
         run: |
           chmod +x scripts/execute_jobs.sh
-          ./scripts/execute_jobs.sh "Group 1" "${{ needs.calculate_distribution.outputs.group1_range }}"
-
-  group2_execution:
-    needs: calculate_distribution
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Execute Group 2 Jobs
-        run: |
-          chmod +x scripts/execute_jobs.sh
-          ./scripts/execute_jobs.sh "Group 2" "${{ needs.calculate_distribution.outputs.group2_range }}"
-
-  group3_execution:
-    needs: calculate_distribution
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Execute Group 3 Jobs
-        run: |
-          chmod +x scripts/execute_jobs.sh
-          ./scripts/execute_jobs.sh "Group 3" "${{ needs.calculate_distribution.outputs.group3_range }}"
+          ./scripts/execute_jobs.sh "${{ matrix.group.name }}" "${{ matrix.group.range }}"
