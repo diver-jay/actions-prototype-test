@@ -1,0 +1,47 @@
+name: Matrix Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      total_jobs:
+        description: 'Total jobs'
+        type: number
+        default: 10
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - name: Generate Matrix
+        id: generate
+        run: |
+          n=${{ github.event.inputs.total_jobs }}
+
+          # 간단한 매트릭스 생성 (GitHub-hosted runners 사용)
+          matrix_json="["
+          for ((i=1; i<=n; i++)); do
+            matrix_json+="{\"job_id\":$i,\"runner\":\"ubuntu-latest\"}"
+            if ((i < n)); then
+              matrix_json+=","
+            fi
+          done
+          matrix_json+="]"
+
+          echo "matrix=$matrix_json" >> $GITHUB_OUTPUT
+          echo "Generated: $matrix_json"
+
+  execute:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    steps:
+      - name: Execute Job
+        run: |
+          echo "Executing Job ID: ${{ matrix.job_id }}"
+          echo "Runner: ${{ matrix.runner }}"
+          sleep 2  # 작업 시뮬레이션
+
